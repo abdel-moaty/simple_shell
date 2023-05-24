@@ -4,46 +4,49 @@
  * nutshell - execute commands in a nutshell
  * @command: command
  * @program: program name
+ * @env: environment
  * Return: Exit Status of Child Process, or -1 (Error)
  */
 int nutshell(char *command, char *program, char **env)
 {
 	pid_t pid;
-	int i, status;
-	char *args[2];
+	int i, status, wordCount;
+	char **arguments;
 
 	command[strcspn(command, "\n")] = '\0';
-	if (strcmp(command, "env") == 0)
+	arguments = nutcracker(command, &wordCount);
+	if (strcmp(arguments[0], "env") == 0)
 	{
 		i = 0;
 		while (env[i] != NULL)
 		{
-			printf("%s\n", env[i]);
-			i++;
+			printf("%s\n", env[i]), i++;
 		}
-		return (0);
-	}
-	pid = fork();
-	if (pid == -1)
-	{
-		perror(program);
-		return (-1);
-	}
-	else if (pid == 0)
-	{
-		args[0] = command;
-		args[1] = NULL;
-		execve(command, args, env);
-		perror(program);
-		exit(EXIT_FAILURE);
+		status = 0;
 	}
 	else
 	{
-		waitpid(pid, &status, 0);
-		if (WIFEXITED(status))
+		pid = fork();
+		if (pid == -1)
 		{
-			return (WEXITSTATUS(status));
+			perror(program);
+			return (-1);
 		}
-		return (-1);
+		else if (pid == 0)
+		{
+			execvp(arguments[0], arguments), perror(program), exit(EXIT_FAILURE);
+		}
+		else
+		{
+			waitpid(pid, &status, 0);
+			if (WIFEXITED(status))
+				status = WEXITSTATUS(status);
+			else
+				status = -1;
+		}
 	}
+	for (i = 0; i < wordCount; i++)
+		free(arguments[i]);
+	free(arguments);
+	return (status);
 }

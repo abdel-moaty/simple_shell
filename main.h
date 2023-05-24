@@ -13,5 +13,6 @@
 int nutshell(char *command, char *program, char **env);
 void nutty(void);
 char *walnut(void);
+char **nutcracker(const char *input, int *wordCount);
 
 #endif /* MAIN_H */
