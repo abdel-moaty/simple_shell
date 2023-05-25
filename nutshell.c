@@ -19,11 +19,11 @@ int nutshell(char *command, char *program, char **env)
 	{
 		i = 0;
 		while (env[i] != NULL)
-		{
 			printf("%s\n", env[i]), i++;
-		}
 		status = 0;
 	}
+	else if (strcmp(arguments[0], "exit") == 0)
+		status = -1;
 	else
 	{
 		pid = fork();
